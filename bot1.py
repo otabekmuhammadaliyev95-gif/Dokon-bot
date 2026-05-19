@@ -1,53 +1,44 @@
-import asyncio
-from aiogram import Bot, Dispatcher, types
-from aiogram.filters import Command
+import os
+import logging
+from aiogram import Bot, Dispatcher, executor, types
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 
-# === TOKEN ===
-BOT_TOKEN = "BU_YERGA_TOKENINGIZNI_QOYING"
-ADMIN_USERNAME = "@sizning_username"  # admin username
+logging.basicConfig(level=logging.INFO)
 
-bot = Bot(token="8827197387:AAE7sJsUxHwvLqN_JoYR737yXEUoe5PQ5Mc")
-dp = Dispatcher()
+BOT_TOKEN = os.environ.get("BOT_TOKEN")
+ADMIN_USERNAME = "@Muhammadaliyev9"
 
-# === MAHSULOTLAR ===
+bot = Bot(token="8827197387:AAEA_gSbAWl6BCPLO3k4F1NVcL911C2cSX8")
+dp = Dispatcher(bot)
+
 mahsulotlar = [
-    {"nomi": "SHokolad", "narxi": "50,000 so'm"},
-    {"nomi": "Oyinchoq mashina", "narxi": "80,000 so'm"},
-    {"nomi": "Oyinchoqlar toplami", "narxi": "120,000 so'm"},
+    {"nomi": "Mahsulot 1", "narxi": "50,000 so'm"},
+    {"nomi": "Mahsulot 2", "narxi": "80,000 so'm"},
+    {"nomi": "Mahsulot 3", "narxi": "120,000 so'm"},
 ]
 
-# === KLAVIATURA ===
 def asosiy_menu():
-    kb = ReplyKeyboardMarkup(
-        keyboard=[
-            [KeyboardButton(text="📦 Mahsulotlar")],
-            [KeyboardButton(text="🛒 Buyurtma berish")],
-            [KeyboardButton(text="📞 Bog'lanish")],
-        ],
-        resize_keyboard=True
-    )
+    kb = ReplyKeyboardMarkup(resize_keyboard=True)
+    kb.add(KeyboardButton("📦 Mahsulotlar"))
+    kb.add(KeyboardButton("🛒 Buyurtma berish"))
+    kb.add(KeyboardButton("📞 Bog'lanish"))
     return kb
 
-# === /start ===
-@dp.message(Command("start"))
+@dp.message_handler(commands=["start"])
 async def start(message: types.Message):
     await message.answer(
-        "Assalomu alaykum! Do'konimizga xush kelibsiz 🛍\n"
-        "Quyidagi menyudan tanlang:",
+        "Assalomu alaykum! Do'konimizga xush kelibsiz 🛍\nQuyidagi menyudan tanlang:",
         reply_markup=asosiy_menu()
     )
 
-# === MAHSULOTLAR ===
-@dp.message(lambda m: m.text == "📦 Mahsulotlar")
+@dp.message_handler(lambda m: m.text == "📦 Mahsulotlar")
 async def mahsulotlar_royxati(message: types.Message):
     matn = "📦 *Mahsulotlarimiz:*\n\n"
     for i, m in enumerate(mahsulotlar, 1):
         matn += f"{i}. {m['nomi']} — {m['narxi']}\n"
     await message.answer(matn, parse_mode="Markdown")
 
-# === BUYURTMA ===
-@dp.message(lambda m: m.text == "🛒 Buyurtma berish")
+@dp.message_handler(lambda m: m.text == "🛒 Buyurtma berish")
 async def buyurtma(message: types.Message):
     await message.answer(
         "Buyurtma berish uchun quyidagi formatda yozing:\n\n"
@@ -57,33 +48,20 @@ async def buyurtma(message: types.Message):
         parse_mode="Markdown"
     )
 
-# === BOG'LANISH ===
-@dp.message(lambda m: m.text == "📞 Bog'lanish")
+@dp.message_handler(lambda m: m.text == "📞 Bog'lanish")
 async def boglanish(message: types.Message):
     await message.answer(
-        f"📞 Admin bilan bog'lanish:\n{ADMIN_USERNAME}\n\n"
-        "Ish vaqti: 9:00 — 18:00"
+        f"📞 Admin bilan bog'lanish:\n{ADMIN_USERNAME}\n\nIsh vaqti: 9:00 — 18:00"
     )
 
-# === BOSHQA XABARLAR (buyurtma qabul) ===
-@dp.message()
+@dp.message_handler()
 async def buyurtma_qabul(message: types.Message):
     if any(x in message.text.lower() for x in ["ism:", "telefon:", "mahsulot:"]):
-        await message.answer(
-            "✅ Buyurtmangiz qabul qilindi!\n"
-            "Tez orada admin siz bilan bog'lanadi."
-        )
-        # Adminga xabar yuborish
-        await bot.send_message(
-            chat_id=message.chat.id,  # bu yerga admin chat_id qo'ying
-            text=f"🛒 Yangi buyurtma!\n\n{message.text}\n\nMijoz: @{message.from_user.username}"
-        )
+        await message.answer("✅ Buyurtmangiz qabul qilindi!\nTez orada admin siz bilan bog'lanadi.")
     else:
         await message.answer("Iltimos, menyudan foydalaning 👇", reply_markup=asosiy_menu())
 
-# === ISHGA TUSHIRISH ===
-async def main():
-    await dp.start_polling(bot)
-
+if __name__ == "__main__":
+    executor.start_polling(dp, skip_updates=True)
 if __name__ == "__main__":
     asyncio.run(main())
