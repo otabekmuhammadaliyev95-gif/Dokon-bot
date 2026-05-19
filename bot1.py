@@ -7,9 +7,8 @@ from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 
 logging.basicConfig(level=logging.INFO)
 
-BOT_TOKEN = os.environ.get("8827197387:AAEA_gSbAWl6BCPLO3k4F1NVcL911C2cSX8")
 ADMIN_USERNAME = "@Muhammadaliyev9"
-
+BOT_TOKEN = os.environ.get("BOT_TOKEN")
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
 
